@@ -5,10 +5,10 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   Request,
-  UseGuards,
+  Res,
 } from '@nestjs/common';
-import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { SkipAuth } from './constants';
 
@@ -19,13 +19,23 @@ export class AuthController {
   @SkipAuth()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  signIn(@Body() signInDto: Record<string, any>) {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+  async signIn(@Body() signInDto: Record<string, any>, @Res() res) {
+    const response = await this.authService.signIn(
+      signInDto.username,
+      signInDto.password,
+    );
+    res.cookie('access_token', response, { httpOnly: true });
+    return res.sendStatus(200);
   }
 
-  @UseGuards(AuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
+  }
+
+  @Get('logout')
+  logout(@Res() res) {
+    res.clearCookie('access_token');
+    return res.sendStatus(200);
   }
 }
