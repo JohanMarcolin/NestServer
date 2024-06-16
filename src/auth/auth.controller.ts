@@ -5,12 +5,13 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Req,
   Request,
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SkipAuth } from './constants';
+import { Roles } from './roles/roles.decorator';
+import { Role } from './roles/role.enum';
 
 @Controller('auth')
 export class AuthController {
@@ -28,6 +29,7 @@ export class AuthController {
     return res.sendStatus(200);
   }
 
+  @Roles(Role.Admin)
   @Get('profile')
   getProfile(@Request() req) {
     return req.user;
